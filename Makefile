@@ -1,7 +1,7 @@
 NAME= philo
 
 CC= cc
-CFLAGS= -Wall -Wextra -Werror -pthread -g
+CFLAGS= -Wall -Wextra -Werror -pthread -fsanitize=thread -g3
 
 INCDIR= includes
 SRCDIR= src
@@ -14,7 +14,6 @@ all: $(NAME)
 $(NAME): $(OBJS)
 	$(CC) $(CFLAGS) $^ -o $@
 
-# Regla para compilar cada .c a .o
 %.o: %.c
 	$(CC) $(CFLAGS) -I$(INCDIR) -c $< -o $@
 

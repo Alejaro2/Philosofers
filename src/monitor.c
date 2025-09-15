@@ -1,6 +1,5 @@
 #include "philo.h"
 
-// Revisa si la simulación ha terminado. No cambia.
 int simulation_ended(t_data *data)
 {
     int ended;
@@ -11,8 +10,6 @@ int simulation_ended(t_data *data)
     return (ended);
 }
 
-// Revisa si todos los filósofos han comido.
-// Se ha hecho un poco más robusto.
 static int check_meals(t_philo *philos)
 {
     int i;
@@ -42,21 +39,15 @@ static int check_meals(t_philo *philos)
     return (0);
 }
 
-// Esta nueva función revisa si un filósofo ha muerto y, si es así,
-// detiene la simulación de forma atómica para evitar condiciones de carrera.
 static int process_death(t_philo *philo)
 {
     pthread_mutex_lock(&philo->data->meal_mutex);
     if (get_time_ms() - philo->last_meal_time > philo->data->time_to_die)
     {
-        // El filósofo está en riesgo. Bloqueamos el estado global
-        // para ser los primeros y únicos en reportar una muerte.
         pthread_mutex_lock(&philo->data->state_mutex);
         if (!philo->data->someone_died)
         {
-            // Es la primera muerte. Lo registramos.
             philo->data->someone_died = 1;
-            // Imprimimos el mensaje de muerte directamente.
             pthread_mutex_lock(&philo->data->print_mutex);
             printf("%ld %d died\n", get_time_ms() - philo->data->start_time,
                 philo->id);
@@ -64,13 +55,12 @@ static int process_death(t_philo *philo)
         }
         pthread_mutex_unlock(&philo->data->state_mutex);
         pthread_mutex_unlock(&philo->data->meal_mutex);
-        return (1); // Muerte detectada, la simulación debe parar.
+        return (1);
     }
     pthread_mutex_unlock(&philo->data->meal_mutex);
-    return (0); // El filósofo sigue vivo.
+    return (0);
 }
 
-// La rutina principal del monitor, ahora más simple y segura.
 void *monitor_routine(void *arg)
 {
     t_philo *philos;
@@ -83,12 +73,12 @@ void *monitor_routine(void *arg)
         while (i < philos[0].data->num_philos)
         {
             if (process_death(&philos[i]))
-                return (NULL); // Salir si alguien murió
+                return (NULL);
             i++;
         }
         if (check_meals(philos))
-            return (NULL); // Salir si todos comieron
-        usleep(1000); // Esperar un poco antes de la siguiente revisión
+            return (NULL);
+        usleep(1000);
     }
     return (NULL);
 }
