@@ -1,12 +1,33 @@
 #include "philo.h"
 
+void print_status(t_philo *philo, char *status)
+{
+    long timestamp;
+    
+    pthread_mutex_lock(&philo->data->print_mutex);
+    if (!philo->data->someone_died)
+    {
+        timestamp = get_time_ms() - philo->data->start_time;
+        printf("%ld %d %s\n", timestamp, philo->id, status);
+    }
+    pthread_mutex_unlock(&philo->data->print_mutex);
+}
+
 int init_data(t_data *data)
 {
-    data->someone_died = 0;
+    memset(data, 0, sizeof(t_data));
+    
     if (pthread_mutex_init(&data->print_mutex, NULL) != 0)
         return 1;
+    if (pthread_mutex_init(&data->state_mutex, NULL) != 0)
+        return 1;
+    if (pthread_mutex_init(&data->meal_mutex, NULL) != 0)
+        return 1;
+    if (pthread_mutex_init(&data->done_eating_mutex, NULL) != 0)
+        return 1;
+    
     data->start_time = get_time_ms();
-    pthread_mutex_init(&data->state_mutex, NULL);
+    data->philos_done_eating = 0;
     return 0;
 }
 
@@ -18,6 +39,7 @@ pthread_mutex_t *init_forks_array(int num_philos)
     forks = malloc(sizeof(pthread_mutex_t) * num_philos);
     if (!forks)
         return NULL;
+        
     i = 0;
     while (i < num_philos)
     {
@@ -33,15 +55,15 @@ pthread_mutex_t *init_forks_array(int num_philos)
     return forks;
 }
 
-
 t_philo *init_philos_array(t_data *data, pthread_mutex_t *forks)
 {
     t_philo *philos;
     int i;
-
+    
     philos = malloc(sizeof(t_philo) * data->num_philos);
     if (!philos)
         return NULL;
+    
     i = 0;
     while (i < data->num_philos)
     {
@@ -63,6 +85,7 @@ void start_philos(t_philo *philos, int num_philos)
     while (i < num_philos)
     {
         pthread_create(&philos[i].thread, NULL, philo_routine, &philos[i]);
+        usleep(100);
         i++;
     }
 }

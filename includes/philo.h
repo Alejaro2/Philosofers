@@ -1,12 +1,13 @@
 #ifndef PHILO_H
 # define PHILO_H
 
-#include <pthread.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <unistd.h>
-#include <sys/time.h>
-
+# include <pthread.h>
+# include <stdio.h>
+# include <stdlib.h>
+# include <string.h>
+# include <unistd.h>
+# include <sys/time.h>
+# include <limits.h>
 
 typedef struct s_data
 {
@@ -17,9 +18,16 @@ typedef struct s_data
     int must_eat_count;
     long start_time;
     int someone_died;
+    int philos_done_eating;
+    
     pthread_mutex_t print_mutex;
     pthread_mutex_t state_mutex;
-}   t_data;
+    pthread_mutex_t meal_mutex;
+    pthread_mutex_t done_eating_mutex;
+    
+    pthread_mutex_t *forks;
+    struct s_philo *philos;
+} t_data;
 
 typedef struct s_philo
 {
@@ -30,31 +38,33 @@ typedef struct s_philo
     pthread_mutex_t *left_fork;
     pthread_mutex_t *right_fork;
     t_data *data;
-}   t_philo;
+} t_philo;
 
 // parse.c
-int     parse_args(int argc, char **argv, t_data *data);
-int     ft_atoi_safe(char *str);
-int     is_number(char *str);
-void join_philos(t_philo *philos, int num_philos);
+int validate_args(int argc, char **argv);
+int ft_atoi_safe(char *str);
+int is_number(char *str);
 
 // init.c
+int init_data(t_data *data);
 pthread_mutex_t *init_forks_array(int num_philos);
 t_philo *init_philos_array(t_data *data, pthread_mutex_t *forks);
-int init_data(t_data *data);
 void start_philos(t_philo *philos, int num_philos);
+void join_philos(t_philo *philos, int num_philos);
+void print_status(t_philo *philo, char *status);
 
-//time.c
+// time.c
 long get_time_ms(void);
 long elapsed_ms(long start_time);
 
-//routine.c 
+// routine.c
 void *philo_routine(void *arg);
 
-//monitor.c 
+// monitor.c
 void *monitor_routine(void *arg);
-int	simulation_ended(t_data *data);
+int simulation_ended(t_data *data);
 
-//clean.c
+// clean.c
 void cleanup(t_philo *philos, pthread_mutex_t *forks, t_data *data);
+
 #endif
