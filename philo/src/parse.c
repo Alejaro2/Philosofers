@@ -6,7 +6,7 @@
 /*   By: alejaro2 <alejaro2@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/09/16 17:32:34 by alejaro2          #+#    #+#             */
-/*   Updated: 2025/09/16 17:32:36 by alejaro2         ###   ########.fr       */
+/*   Updated: 2025/09/17 18:55:11 by alejaro2         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -48,7 +48,6 @@ int	ft_atoi_safe(char *str)
 int	validate_args(int argc, char **argv)
 {
 	int		i;
-	long	value;
 
 	if (argc < 5 || argc > 6)
 		return (1);
@@ -57,7 +56,6 @@ int	validate_args(int argc, char **argv)
 	{
 		if (!is_number(argv[i]))
 			return (1);
-		value = ft_atoi_safe(argv[i]);
 		i++;
 	}
 	return (0);
